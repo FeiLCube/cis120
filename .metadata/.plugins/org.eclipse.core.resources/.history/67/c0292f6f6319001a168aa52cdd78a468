@@ -1,0 +1,47 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.Timer;
+
+import java.util.*;
+
+@SuppressWarnings("serial")
+public class BattleshipGameCourt extends JPanel {
+	
+	private static final int COURT_WIDTH = 800;
+	private static final int COURT_HEIGHT = 1600;
+	
+	private JLabel status;
+	public boolean isPlaying = false;
+	
+	private static final int TIME_INTERVAL = 35;
+	private boolean playerTurn = true;
+	
+	private int[][] gameBoard;
+	Collection<Ship> ships;
+	
+	public BattleshipGameCourt(JLabel status) {
+		setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		
+		Timer timer = new Timer(TIME_INTERVAL, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                tick();
+            }
+        });
+		
+		timer.start();
+		
+		setFocusable(true);
+		
+		addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				
+			}
+		});
+	}
+	
+	public void tick() {
+		
+		repaint();
+	}
+}

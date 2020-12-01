@@ -1,0 +1,13 @@
+{
+// Configure your Run and Preview buttons here.
+
+// Run button configuration
+  "commands": {
+    "Compile": "make TwitterBot",
+    "Run TwitterBot": "make run",
+    "Clean Project": "make clean",
+    "Prettify File": "java -jar /home/codio/bin/google-java-format-1.5-all-deps.jar --replace {{filepath}}",
+    "Zip Project": "make zip"
+  }
+
+}

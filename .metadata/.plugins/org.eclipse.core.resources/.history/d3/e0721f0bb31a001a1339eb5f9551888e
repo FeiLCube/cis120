@@ -1,0 +1,11 @@
+import java.awt.*;
+
+public class BattleshipMain implements Runnable {
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+
+	}
+
+}

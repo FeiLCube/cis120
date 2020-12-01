@@ -1,0 +1,24 @@
+{
+ "mainSource": "src",
+ "testSource": "test",
+ "libraries": "",
+ "cases": [
+  {
+   "path": "test/ServerModelTest.java",
+   "className": "ServerModelTest"
+  },
+  {
+   "path": "test/InviteOnlyTest.java",
+   "className": "InviteOnlyTest"
+  },
+  {
+   "path": "test/ChannelsMessagesTest.java",
+   "className": "ChannelsMessagesTest"
+  },
+  {
+   "path": "test/ConnectionNicknamesTest.java",
+   "className": "ConnectionNicknamesTest"
+  }
+ ],
+ "wd": ""
+}

@@ -1,0 +1,77 @@
+=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+CIS 120 Homework 7 README
+PennKey: _______
+=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+
+============
+=: Task 2 :=
+============
+
+- Do you plan on creating any new classes in your design? If so, what classes
+  are you making, what do they store, and what behaviors do they have?
+  The only new class I have created is Channel, which is supposed to represent the behavior of
+  a channel in the server. So far, I have only defined the private fields name, users, 
+  nicknamesOfUsers, and ownerId. I have also created getter functions to help with implementing
+  the functions required of this task. I have getter functions, but that's about it for this
+  class.
+  
+- How do you plan on storing what users are registered on the server?
+  I stored user IDs in a Map, because each user has a User ID and a nickname, which should
+  be mapped to each other.
+
+- How do you plan on keeping track of which user has which user ID, considering
+  the fact that the user's nickname can change over the course of the program?
+  The user ID is the key in the TreeMap clientData, so while the value (nickname) may be changed, 
+  the key (user ID) to which that value is mapped to should not change.
+
+- How do you plan on storing what users are in a channel?
+  In my class Channel, I stored the users in a Map.
+
+- How do you plan on keeping track of which user is the owner of each channel?
+  In my class Channel, I have a field that is called the ownerID, which is an integer.
+
+- Justify your choice of collections (Set, Map, or List) for the
+  collections you use in your design.
+  I have user IDs in a Map, because each user has a User ID and a nickname, which should
+  be mapped to each other. The user ID is the key in the TreeMap clientData, so while the value (nickname) may be changed, 
+  the key (user ID) to which that value is mapped to should not change. The users field in my
+  Channel class stores users in a Map for the same reason.
+
+
+============
+=: Task 3 :=
+============
+
+- Did you make any changes to your design while doing this task? Why?
+  I changed the design of channels in the ServerModel class to a Set instead of a Map. This
+  is because iterating through the map took much more work than iterating through a single set.
+
+
+============
+=: Task 4 :=
+============
+
+- Did you make any changes to your design while doing this task? Why?
+	None.
+
+============
+=: Task 5 :=
+============
+
+- How do you plan on keeping track of which channels are invite-only?
+	A boolean field called inviteOnly.
+
+- Will you make any changes to your work from before in order to make
+  implementing invite-only channels easier?
+	Nope.
+
+============
+=: Task 6 :=
+============
+
+- Did you have to make any changes to your design in Task 6? Why?
+	None.
+- If you were to redo this assignment, what changes (if any) would you make in
+  how you designed your code?
+  	None.
+

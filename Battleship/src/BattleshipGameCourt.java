@@ -1,0 +1,400 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.Timer;
+
+import java.util.*;
+
+@SuppressWarnings("serial")
+public class BattleshipGameCourt extends JPanel {
+
+	// Game window parameters
+	public static final int WINDOW_WIDTH = 400;
+	public static final int WINDOW_HEIGHT = 800;
+	public static final int NUM_ROWS = 20;
+	public static final int NUM_COL = 10;
+	public static final int SQUARE_LENGTH = WINDOW_WIDTH / NUM_ROWS;
+
+	private JLabel status;
+	public boolean isPlaying = false;
+
+	private static final int TIME_INTERVAL = 35;
+	private boolean playerTurn = true;
+
+	/*
+	 * gameBoard represents the missiles you've fired, and yourShips is how many
+	 * ships you you still have. There is one of each for both the player and the
+	 * AI.
+	 */
+	private Missile[][] gameBoard = new Missile[10][10];
+	private Missile[][] aiGameBoard = new Missile[10][10];
+	Collection<Ship> yourShips = new TreeSet<Ship>();
+	Collection<Ship> compShips = new TreeSet<Ship>();
+
+	public BattleshipGameCourt(JLabel status) {
+
+		setFocusable(true);
+		this.status = status;
+		setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		restart();
+
+		/*
+		 * This mouseListener listens for a mouse click during the game, and will fire a
+		 * missile at the coordinate and update the game model based on whether it was a
+		 * hit or miss.
+		 */
+		addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+
+				if (playerTurn) {
+					/*
+					 * Math computation to get x-coordinates and y-coordinates of the mouse in terms
+					 * of rows and columns.
+					 */
+					int xCoord = (int) (Math.round(e.getX() - (e.getX() % SQUARE_LENGTH)));
+					int yCoord = (int) (Math.round(e.getY() - (e.getY() % SQUARE_LENGTH)));
+					int x = xCoord / SQUARE_LENGTH;
+					int y = yCoord / SQUARE_LENGTH;
+
+					/*
+					 * After a mousePressed action occurs, this conditional checks to see if the
+					 * fired missile hit a ship or not, and updates the game model (gameBoard and
+					 * tempShip.isHit[i]) accordingly.
+					 */
+					if (gameBoard[x][y] == null) {
+						if (containsShip(x, y, yourShips)) {
+							tempShip.isHit[index] = true;
+							gameBoard[x][y] = new Missile(x, y, true);
+						} else {
+							gameBoard[x][y] = new Missile(x, y, false);
+						}
+						playerTurn = !playerTurn;
+					}
+
+					// TODO: add a conditional statement that checks the case where you're firing
+					// at a coordinate you've already fired before.
+				}
+			}
+		});
+
+		Timer timer = new Timer(TIME_INTERVAL, new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				tick();
+			}
+		});
+
+		timer.start();
+	}
+
+	/*
+	 * Temporary "holder" variables used to store values from the function
+	 * containsShip. These variables are used in the constructor to be able to
+	 * identify which ships and which part of the ship was hit.
+	 */
+	Ship tempShip;
+	int index = 0;
+
+	/*
+	 * Helper function for the constructor. This function checks to see if there is
+	 * a ship part at xCoord and yCoord.
+	 * 
+	 * Arguments: xCoord - x-coordinate to check yCoord - y-coordinate to check
+	 * Returns: a boolean that will be true if a ship part was at the coordinate.
+	 */
+	public boolean containsShip(int xCoord, int yCoord, Collection<Ship> ships) {
+		boolean contains = false;
+
+		if (ships != null) {
+			for (Ship ship : ships) {
+				int[] px = ship.getXCoord();
+				int[] py = ship.getYCoord();
+
+				for (int i = 0; i < ship.getLength(); i++) {
+					if ((px[i] == xCoord) && py[i] == yCoord) {
+						contains = true;
+						index = i;
+						break;
+					}
+				}
+			}
+		}
+		return contains;
+	}
+
+	/*
+	 * Helper function for restart. This function draws the rows and columns for the
+	 * for the game.
+	 */
+	public void drawBoard(Graphics g) {
+
+		g.setColor(Color.BLACK);
+
+		for (int i = 0; i < NUM_ROWS; i++) {
+			int y = (WINDOW_HEIGHT / NUM_ROWS) * i;
+			g.drawLine(0, y, 800, y);
+		}
+
+		for (int i = 0; i < NUM_COL; i++) {
+			int x = (WINDOW_WIDTH / NUM_COL) * i;
+			g.drawLine(x, 0, x, 1600);
+		}
+	}
+
+	/*
+	 * Helper function for restart. This function takes care of the first stage of
+	 * the game where the player and the AI places ships.
+	 * 
+	 * Arguments: length - the ship's length.
+	 */
+	public void placeShips(int length) {
+
+		addMouseListener(new MouseAdapter() {
+
+			// Container variables
+			boolean shipPlaced = false;
+			int x0 = -1;
+			int y0 = -1;
+			int x1 = -1;
+			int y1 = -1;
+			boolean firstClick = true;
+
+			// Higher order function
+			public void mousePressed(MouseEvent e) {
+
+				while (!shipPlaced) {
+					/* Store the initial and final coordinates of the mouse */
+					if (firstClick) {
+						int xCoord = (int) (Math.round(e.getX() - (e.getX() % SQUARE_LENGTH)));
+						int yCoord = (int) (Math.round(e.getY() - (e.getY() % SQUARE_LENGTH)));
+						x0 = xCoord / SQUARE_LENGTH;
+						y0 = yCoord / SQUARE_LENGTH;
+						firstClick = false;
+					} else {
+						int xCoord = (int) (Math.round(e.getX() - (e.getX() % SQUARE_LENGTH)));
+						int yCoord = (int) (Math.round(e.getY() - (e.getY() % SQUARE_LENGTH)));
+						x1 = xCoord / SQUARE_LENGTH;
+						y1 = yCoord / SQUARE_LENGTH;
+					}
+
+					// Finally add a new ship to the collection.
+					if (!firstClick && placementSuccessful(length, x0, x1, y0, y1, yourShips)) {
+						int[] px = new int[length];
+						int[] py = new int[length];
+
+						for (int i = 0; i < length; i++) {
+							if (x1 == x0) {
+								py[i] = y0;
+								px[i] = Math.min(x1, x0) + i;
+							} else {
+								px[i] = x0;
+								py[i] = Math.min(y1, y0) + i;
+							}
+						}
+
+						yourShips.add(new Ship(length, px, py));
+					}
+
+					if (yourShips.size() == length - 1) {
+						shipPlaced = true;
+					}
+				}
+			}
+		});
+
+		if (length <= 6) {
+			placeShips(length + 1);
+		}
+	}
+
+	/* Function to help AI randomly place ships on aiGameBoard. */
+	private void placeAIShips(int length) {
+
+		boolean shipPlaced = false;
+
+		while (!shipPlaced) {
+			int x0 = (int) (Math.random() * 100) / 10;
+			int y0 = (int) (Math.random() * 100) / 10;
+			int x1 = (int) (Math.random() * 100) / 10;
+			int y1 = (int) (Math.random() * 100) / 10;
+			int[] px = new int[length];
+			int[] py = new int[length];
+
+			boolean lengthInbounds = (Math.abs(x1 - x0) <= length) && (Math.abs(y1 - y0) <= length);
+			if (placementSuccessful(length, x0, x1, y0, y1, compShips) && lengthInbounds) {
+				for (int i = 0; i < length; i++) {
+					if (Math.random() < 0.5) {
+						px[i] = x0;
+						py[i] = Math.min(y1, y0) + i;
+					} else {
+						py[i] = y0;
+						px[i] = Math.min(x1, x0) + i;
+					}
+				}
+				if (compShips.size() == length - 1) {
+					shipPlaced = true;
+				}
+			}
+		}
+
+		if (length <= 6) {
+			placeAIShips(length + 1);
+		}
+	}
+
+	/*
+	 * Helper function for placeShips and placeAIShips to check to see if ship
+	 * placement is valid.
+	 */
+	private boolean placementSuccessful(int length, int xi, int xf, int yi, int yf, Collection<Ship> ships) {
+		/*
+		 * Once the initial and final coordinates of the ship are stored, create a new
+		 * ship and add it to yourShips.
+		 */
+
+		// Checks to see if second click was horizontally or vertically aligned with
+		// the first click.
+		boolean shipInbounds = (yf > -1 && yf < 10) && (yi > -1 && yf < 10) && (xf > -1 && xi < 10)
+				&& (xf > -1 && xi < 10);
+		boolean horizontallyAligned = (xf == xi) && (yf != yi);
+		boolean verticallyAligned = (xf != xi) && (yf != yi);
+		boolean goodSecondClick = horizontallyAligned || verticallyAligned;
+
+		// Check to see if ships don't overlap.
+		boolean goodPlacement = true;
+		for (int i = 0; i < length; i++) {
+			if (horizontallyAligned) {
+				int yCoord = Math.min(yf, yi) + i;
+				if (containsShip(xi, yCoord, ships)) {
+					goodPlacement = false;
+					break;
+				}
+			} else if (verticallyAligned) {
+				int xCoord = Math.min(xf, xi) + i;
+				if (containsShip(xCoord, yi, ships)) {
+					goodPlacement = false;
+					break;
+				}
+			}
+		}
+
+		return (goodSecondClick && goodPlacement && shipInbounds);
+	}
+
+	/*
+	 * Restore the game to a new game.
+	 * 
+	 * The argument is for the sole purpose of passing it into drawBoard, which
+	 * itself requires a graphics context.
+	 */
+	public void restart() {
+		isPlaying = false;
+
+		for (int i = 0; i < gameBoard.length; i++) {
+			for (int k = 0; k < gameBoard[i].length; k++) {
+				gameBoard[i][k] = null;
+				aiGameBoard[i][k] = null;
+			}
+		}
+
+		placeShips(2);
+		placeAIShips(2);
+		isPlaying = true;
+		if (isPlaying) {
+			status.setText("The battle is on! Click on any square you have not fired at before to fire a missile!");
+		}
+	}
+
+	/*
+	 * Constantly repaints the board and checks for win conditions and update the
+	 * game model.
+	 */
+	public void tick() {
+
+		if (!playerTurn) {
+			int x = (int) ((Math.random() * 100) / 10);
+			int y = (int) ((Math.random() * 100) / 10);
+
+			if (aiGameBoard[x][y] == null) {
+				if (containsShip(x, y, yourShips)) {
+					tempShip.isHit[index] = true;
+					aiGameBoard[x][y] = new Missile(x, y, true);
+				} else {
+					aiGameBoard[x][y] = new Missile(x, y, false);
+				}
+				playerTurn = !playerTurn;
+			}
+		}
+		/*
+		 * Check for ships that have had all their parts hit by missiles. Removes the
+		 * ship from the appropriate collection of ships if the ship is sunk.
+		 */
+		for (Ship ship : yourShips) {
+			boolean sunkShip = true;
+
+			for (boolean bool : ship.isHit) {
+				if (!bool) {
+					sunkShip = false;
+					break;
+				}
+			}
+
+			if (sunkShip) {
+				yourShips.remove(ship);
+				break;
+			}
+		}
+		for (Ship ship : compShips) {
+			boolean sunkShip = true;
+
+			for (boolean bool : ship.isHit) {
+				if (!bool) {
+					sunkShip = false;
+					break;
+				}
+			}
+
+			if (sunkShip) {
+				compShips.remove(ship);
+				break;
+			}
+		}
+
+		if (isPlaying) {
+			if (yourShips.size() == 0) {
+				isPlaying = false;
+				status.setText("You Lose!");
+			} else if (compShips.size() == 0) {
+				isPlaying = false;
+				status.setText("You Win!");
+			}
+		}
+
+		repaint();
+	}
+
+	@Override
+	public void paintComponent(Graphics g) {
+
+		super.paintComponent(g);
+
+		if (!isPlaying) {
+			g.clearRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+			drawBoard(g);
+		}
+
+		if (yourShips != null) {
+			for (Ship ship : yourShips) {
+				ship.draw(g);
+			}
+		}
+
+		for (Missile[] row : gameBoard) {
+			for (Missile col : row) {
+				if (col == null) {
+					continue;
+				}
+				col.draw(g);
+			}
+		}
+	}
+}

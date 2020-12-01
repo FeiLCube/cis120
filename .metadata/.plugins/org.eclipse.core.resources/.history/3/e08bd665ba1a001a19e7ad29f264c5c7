@@ -1,0 +1,212 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.Timer;
+
+import java.util.*;
+
+@SuppressWarnings("serial")
+public class BattleshipGameCourt extends JPanel {
+	
+	public static final int WINDOW_WIDTH = 880;
+	public static final int WINDOW_HEIGHT = 1760;
+	public static final int SQUARE_LENGTH = WINDOW_WIDTH / 11;
+	
+	private JLabel status;
+	public boolean isPlaying = false;
+	
+	private static final int TIME_INTERVAL = 35;
+	private boolean playerTurn = true;
+	
+	private Missile[][] gameBoard = new Missile[10][10];
+	Collection<Ship> yourShips;
+	Collection<Ship> compShips;
+	
+	public BattleshipGameCourt(JLabel status) {
+		setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		
+		Timer timer = new Timer(TIME_INTERVAL, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                tick();
+            }
+        });
+		
+		timer.start();
+		
+		setFocusable(true);
+		
+		addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				/*Math computation to get x-coordinates and y-coordinates of the mouse in terms
+				 * of rows and columns. */
+				int xCoord = (int) (Math.round(e.getX() - (e.getX() % SQUARE_LENGTH)));
+				int yCoord = (int) (Math.round(e.getY() - (e.getY() % SQUARE_LENGTH)));
+				int x = xCoord / SQUARE_LENGTH;
+				int y = yCoord / SQUARE_LENGTH;
+				
+				/*After a mousePressed action occurs, this conditional checks to see if the
+				 * fired missile hit a ship or not, and updates the game model (gameBoard
+				 * and tempShip.isHit[i]) accordingly. */
+				if (containsShip(x, y)) {
+					tempShip.isHit[index] = true;
+					gameBoard[x][y] = new Missile(x, y, true);
+				} else {
+					gameBoard[x][y] = new Missile(x, y, false);
+				}
+				
+				//TODO: add a conditional statement that checks the case where you're firing
+				// at a coordinate you've already fired before.
+				
+			}
+		});
+		
+		this.status = status;
+	}
+	
+	// Temporary "holder" variables used to store values from the function containsShip.
+	Ship tempShip;
+	int index = 0;
+	
+	public boolean containsShip(int xCoord, int yCoord) {
+		boolean containsx = false;
+		boolean containsy = false;
+		
+		for (Ship ship : yourShips) {
+			int[] px = ship.getXCoord();
+			int[] py = ship.getYCoord();
+			
+			int i = 0;
+			
+			for (int x : px) {
+				i++;
+				if (x == xCoord) {
+					containsx = true;
+				}
+			}
+			
+			for (int y : py) {
+				if (y == yCoord) {
+					containsy = true;
+				}
+			}
+			
+			if (containsx && containsy) {
+				index = i;
+				tempShip = ship;
+				break;
+			} else {
+				containsx = false;
+				containsy = false;
+			}
+		}
+		
+		return (containsx && containsy);
+	}
+	
+	public void drawBoard(Graphics g) {
+		
+		g.setColor(Color.BLACK);
+		
+		for (int i = 0; i < 22; i++) {
+			int y = (WINDOW_HEIGHT / 22) * i;
+			g.drawLine(0, y, 800, y);
+		}
+		
+		for (int i = 0; i < 11; i++) {
+			int x = (WINDOW_WIDTH / 11) * i;
+			g.drawLine(x, 0, x, 1600);
+		}
+	}
+	
+	public void placeShips(int length) {
+		
+		boolean shipPlaced = false;
+		int x0;
+		int y0;
+		int x1;
+		int y1;
+		//boolean firstPress = true;
+		
+		while (!shipPlaced) {
+			addMouseListener(new MouseAdapter() {
+				boolean firstPress = true;
+				public void mousePressed(MouseEvent e) {
+					/* Store the initial and final coordinates of the mouse */
+					if (firstPress) {
+						int x0 = (int) (Math.round(e.getX() - (e.getX() % SQUARE_LENGTH)));
+						int y0 = (int) (Math.round(e.getY() - (e.getY() % SQUARE_LENGTH)));
+						firstPress = false;
+					} else {
+						int x1 = (int) (Math.round(e.getX() - (e.getX() % SQUARE_LENGTH)));
+						int y1 = (int) (Math.round(e.getY() - (e.getY() % SQUARE_LENGTH)));
+					}
+					
+					/* Once the initial and final coordinates of the ship are stored,
+					 * create a new ship and add it to yourShips.*/
+					if (!firstPress) {
+						int[] px = new int[length];
+						int[] py = new int[length];
+						
+						for (int i = 0; i < length; i++) {
+							
+						}
+						yourShips.add(new Ship(length, px, py));
+						firstPress = true;
+					}
+				}
+			});
+		}
+		
+		if (length <= 6 ) {
+			placeShips(length + 1);
+		}
+	}
+	
+	public void restart(Graphics g) {
+		
+		for (int i = 0; i < gameBoard.length; i++) {
+			for (int k = 0; k < gameBoard[i].length; k++) {
+				gameBoard[i][k] = null;
+			}
+		}
+		
+		isPlaying = false;
+		g.clearRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+		
+		drawBoard(g);
+		placeShips(2);
+		
+		status.setText("The battle is on!");
+	}
+	
+	public void tick() {
+		
+		if (isPlaying) {
+			if (yourShips.size() == 0) {
+				isPlaying = false;
+				status.setText("You Lose!");
+			} else if (compShips.size() == 0) {
+				isPlaying = false;
+				status.setText("You Win!");
+			}
+		}
+		
+		repaint();
+	}
+	
+	@Override
+	public void paintComponent(Graphics g) {
+		
+		super.paintComponent(g);
+		
+		for (Ship ship : yourShips) {
+			ship.draw(g);
+		}
+		
+		for (Missile[] row : gameBoard) {
+			for (Missile col : row) {
+				col.draw(g);
+			}
+		}
+	}
+}

@@ -1,0 +1,58 @@
+
+import java.awt.*;
+
+public class Ship {
+	
+	private int length;
+	private int[] px, py;
+	
+	public Ship(int length, int[] xCoord, int[] yCoord) {
+		this.length = length;
+		this.px = xCoord;
+		this.py = yCoord;
+	}
+	
+	public int getLength() {
+		return this.length;
+	}
+	
+	public boolean containsShip(int xCoord, int yCoord) {
+		boolean containsx = false;
+		boolean containsy = false;
+		
+		for (int coordinate : px) {
+			if (coordinate == xCoord) {
+				containsx = true;
+			}
+		}
+		
+		for (int coordinate : py) {
+			if (coordinate == yCoord) {
+				containsy = true;
+			}
+		}
+		
+		return (containsx && containsy);
+	}
+	
+	public void draw(Graphics g) {
+		int minYCoord = 1000;
+		int minXCoord = 1000;;
+		
+		for (int coord : px) {
+			if (coord < minXCoord) {
+				minXCoord = coord;
+			}
+		}
+		
+		for (int coord : py) {
+			if (coord < minYCoord) {
+				minYCoord = coord;
+			}
+		}
+		
+		g.setColor(Color.WHITE);
+		g.fillRect(minXCoord, minYCoord, 30 * px.length, 30 * py.length);
+		
+	}
+}

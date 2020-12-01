@@ -1,0 +1,24 @@
+{
+ "mainSource": "src",
+ "testSource": "test",
+ "libraries": "",
+ "cases": [
+  {
+   "path": "test/FileLineIteratorTest.java",
+   "className": "FileLineIteratorTest"
+  },
+  {
+   "path": "test/TweetParserTest.java",
+   "className": "TweetParserTest"
+  },
+  {
+   "path": "test/MarkovChainTest.java",
+   "className": "MarkovChainTest"
+  },
+  {
+   "path": "test/TwitterBotTest.java",
+   "className": "TwitterBotTest"
+  }
+ ],
+ "wd": ""
+}

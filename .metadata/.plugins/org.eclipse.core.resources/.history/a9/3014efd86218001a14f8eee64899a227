@@ -1,0 +1,10 @@
+
+public class ShipStatus {
+	
+	private int px, py;
+	private boolean isHit;
+	
+	public ShipStatus() {
+		
+	}
+}

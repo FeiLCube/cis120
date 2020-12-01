@@ -1,0 +1,95 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.Timer;
+
+import java.util.*;
+
+@SuppressWarnings("serial")
+public class BattleshipGameCourt extends JPanel {
+	
+	private static final int COURT_WIDTH = 800;
+	private static final int COURT_HEIGHT = 1600;
+	
+	private JLabel status;
+	public boolean isPlaying = false;
+	
+	private static final int TIME_INTERVAL = 35;
+	private boolean playerTurn = true;
+	
+	private int[][] gameBoard;
+	Collection<Ship> ships;
+	
+	public BattleshipGameCourt(JLabel status) {
+		setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		
+		Timer timer = new Timer(TIME_INTERVAL, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                tick();
+            }
+        });
+		
+		timer.start();
+		
+		setFocusable(true);
+		
+		addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int x = e.getX() - (e.getX() / 30);
+				int y = e.getY() - (e.getY() / 30);
+				
+				for (Ship ship : ships) {
+					int[] px = ship.getXCoord();
+					int[] py = ship.getYCoord();
+					
+					if (containsShip(x, y)) {
+						ship.isHit[index] = true;
+					}
+				}
+			}
+		});
+	}
+	
+	Ship tempShip;
+	int index = 0;
+	
+	public boolean containsShip(int xCoord, int yCoord) {
+		boolean containsx = false;
+		boolean containsy = false;
+		
+		for (Ship ship : ships) {
+			int[] px = ship.getXCoord();
+			int[] py = ship.getYCoord();
+			
+			int i = 0;
+			
+			for (int x : px) {
+				i++;
+				if (x == xCoord) {
+					containsx = true;
+				}
+			}
+			
+			for (int y : py) {
+				if (y == yCoord) {
+					containsy = true;
+				}
+			}
+			
+			if (containsx && containsy) {
+				tempShip = ship;
+				break;
+			} else {
+				containsx = false;
+				containsy = false;
+			}
+		}
+		
+		return (containsx && containsy);
+	}
+	
+	public void tick() {
+		
+		repaint();
+	}
+}
